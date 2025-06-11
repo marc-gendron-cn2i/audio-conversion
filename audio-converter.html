@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur Audio Eleven Labs</title>
+
+  <!-- Polices -->
+  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base */
+    body {
+      background: #f8f8f8;
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Red Hat Display', sans-serif;
+      color: #333;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      max-width: 700px;
+      width: 100%;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Titre */
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2rem;
+      color: #d51D2C;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Zone de texte */
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid #d51D2C;
+      border-radius: 6px;
+      resize: vertical;
+      margin-bottom: 1rem;
+    }
+
+    /* Boutons */
+    button, #downloadLink {
+      display: inline-block;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button {
+      background-color: #d51D2C;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    button:hover {
+      background-color: #b31a26;
+    }
+
+    /* Lien de téléchargement */
+    #downloadLink {
+      background-color: #ff6d0d;
+      color: #fff;
+      display: none;
+      text-align: center;
+    }
+    #downloadLink:hover {
+      background-color: #e65c0c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Générateur Audio</h1>
+    <textarea id="textInput" placeholder="Entrez votre texte ici…"></textarea>
+    <button id="generate">Générer l’audio</button>
+    <a id="downloadLink">📥 Télécharger l’audio</a>
+  </div>
+
+  <script type="module">
+    import { ElevenLabsClient } from 'https://unpkg.com/@elevenlabs/elevenlabs-js?module';
+
+    const client = new ElevenLabsClient({ apiKey: 'sk_72b2e4373674b18643aa5c3006da80836e14848e53b9a055' });
+    const voiceId = 'JBFqnCBsd6RMkjVDRZzb';
+
+    document.getElementById('generate').addEventListener('click', async () => {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) return alert('Veuillez saisir du texte.');
+
+      try {
+        const audioBlob = await client.textToSpeech.convert(voiceId, {
+          outputFormat: 'mp3_44100_128',
+          text,
+          modelId: 'eleven_multilingual_v2'
+        });
+
+        const url = URL.createObjectURL(audioBlob);
+        const link = document.getElementById('downloadLink');
+        link.href = url;
+        link.download = 'elevenlabs_audio.mp3';
+        link.style.display = 'inline-block';
+      } catch (err) {
+        console.error(err);
+        alert('Erreur lors de la génération de l’audio : ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
