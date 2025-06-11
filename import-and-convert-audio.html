@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur Audio ArcXP → S3</title>
+
+  <!-- Polices -->
+  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base */
+    body {
+      background: #f8f8f8;
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Red Hat Display', sans-serif;
+      color: #333;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      max-width: 700px;
+      width: 100%;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Titre */
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2rem;
+      color: #d51D2C;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Champ ID */
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid #d51D2C;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+
+    /* Boutons & lien */
+    button, #downloadLink {
+      display: inline-block;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button {
+      background-color: #d51D2C;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    button:hover {
+      background-color: #b31a26;
+    }
+    #downloadLink {
+      background-color: #ff6d0d;
+      color: #fff;
+      display: none;
+      margin-left: 0.5rem;
+    }
+    #downloadLink:hover {
+      background-color: #e65c0c;
+    }
+
+    /* Message d’état */
+    #status {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Audio depuis Arc XP → S3</h1>
+    <input id="storyId" type="text" placeholder="Entrez l’ID de l’article Arc XP">
+    <br>
+    <button id="generate">Générer l’audio</button>
+    <a id="downloadLink" target="_blank" rel="noopener">🔗 Écouter / Télécharger</a>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // 👉 Remplacez par l'URL de votre fonction serverless
+    const API_ENDPOINT = 'https://votre-domain.com/api/generateAudio';
+
+    document.getElementById('generate').addEventListener('click', async () => {
+      const btn = document.getElementById('generate');
+      const status = document.getElementById('status');
+      const downloadLink = document.getElementById('downloadLink');
+      const storyId = document.getElementById('storyId').value.trim();
+
+      downloadLink.style.display = 'none';
+      status.textContent = '';
+      if (!storyId) {
+        return alert('Veuillez saisir un ID d’article.');
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Génération en cours…';
+
+        // Appel GET sur /{id}
+        const res = await fetch(`${API_ENDPOINT}/${encodeURIComponent(storyId)}`);
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Statut ${res.status} : ${err}`);
+        }
+        const { audioUrl } = await res.json();
+
+        // Affichage du lien
+        downloadLink.href = audioUrl;
+        downloadLink.textContent = '🔗 Écouter / Télécharger';
+        downloadLink.style.display = 'inline-block';
+        status.textContent = `Audio disponible à : ${audioUrl}`;
+      } catch (e) {
+        console.error(e);
+        status.textContent = '❌ Erreur : ' + e.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Générer l’audio';
+      }
+    });
+  </script>
+</body>
+</html>
